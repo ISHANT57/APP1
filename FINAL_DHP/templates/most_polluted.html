@@ -1,0 +1,418 @@
+{% extends "layout.html" %}
+
+{% block title %}Most Polluted Places{% endblock %}
+
+{% block page_id %}most-polluted{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1627588891335-ebdb145dd3ef');">
+    <div class="container">
+        <h1>Most Polluted Places</h1>
+        <p>Discover the most polluted countries and cities in the world. Explore air quality data and pollution trends.</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Toggle Buttons -->
+    <div class="btn-group mb-4" role="group" aria-label="Toggle between countries and cities">
+        <button type="button" class="btn btn-primary active" id="countries-tab-btn">Most Polluted Countries</button>
+        <button type="button" class="btn btn-outline-primary" id="cities-tab-btn">Most Polluted Cities</button>
+    </div>
+    
+    <!-- Countries Tab -->
+    <div id="countries-tab" class="tab-content mb-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-globe me-2"></i>Most Polluted Countries of 2024</h3>
+                    <div class="chart-container mb-4">
+                        <canvas id="polluted-countries-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-pie me-2"></i>AQI Category Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="category-distribution-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card mt-4">
+            <h3><i class="fas fa-table me-2"></i>Top 50 Most Polluted Countries</h3>
+            <div class="table-responsive">
+                <div class="data-table-wrapper">
+                    <div class="input-group data-table-search">
+                        <input type="text" class="form-control" placeholder="Search countries..." id="countries-search">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <table class="table table-hover data-table" id="polluted-countries-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Country</th>
+                                <th>2024 Avg. AQI</th>
+                                <th>Jan</th>
+                                <th>Feb</th>
+                                <th>Mar</th>
+                                <th>Apr</th>
+                                <th>May</th>
+                                <th>Jun</th>
+                                <th>Jul</th>
+                                <th>Aug</th>
+                                <th>Sep</th>
+                                <th>Oct</th>
+                                <th>Nov</th>
+                                <th>Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for country in top_polluted_countries %}
+                            <tr>
+                                <td>
+                                    {% if country.Rank <= 3 %}
+                                    <span class="rank-badge top-3">{{ country.Rank }}</span>
+                                    {% elif country.Rank <= 10 %}
+                                    <span class="rank-badge top-10">{{ country.Rank }}</span>
+                                    {% else %}
+                                    <span class="rank-badge">{{ country.Rank }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ country.Country }}</td>
+                                <td>
+                                    {% set avg_aqi = country['2024 Avg']|float %}
+                                    <span class="aqi-cell" 
+                                        style="background-color: 
+                                        {% if avg_aqi <= 50 %}var(--good-color)
+                                        {% elif avg_aqi <= 100 %}var(--moderate-color)
+                                        {% elif avg_aqi <= 150 %}var(--sensitive-color)
+                                        {% elif avg_aqi <= 200 %}var(--unhealthy-color)
+                                        {% elif avg_aqi <= 300 %}var(--very-unhealthy-color)
+                                        {% else %}var(--hazardous-color)
+                                        {% endif %};
+                                        color: {% if avg_aqi > 50 and avg_aqi <= 100 %}black{% else %}white{% endif %};">
+                                        {{ avg_aqi }}
+                                    </span>
+                                </td>
+                                <td>{{ country.Jan }}</td>
+                                <td>{{ country.Feb }}</td>
+                                <td>{{ country.Mar }}</td>
+                                <td>{{ country.Apr }}</td>
+                                <td>{{ country.May }}</td>
+                                <td>{{ country.Jun }}</td>
+                                <td>{{ country.Jul }}</td>
+                                <td>{{ country.Aug }}</td>
+                                <td>{{ country.Sep }}</td>
+                                <td>{{ country.Oct }}</td>
+                                <td>{{ country.Nov }}</td>
+                                <td>{{ country.Dec }}</td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cities Tab -->
+    <div id="cities-tab" class="tab-content mb-5" style="display: none;">
+        <div class="dashboard-card mb-4">
+            <h3><i class="fas fa-city me-2"></i>Most Polluted Cities</h3>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="city-state-select" class="form-label">Select City:</label>
+                    <select id="city-state-select" class="form-select">
+                        <option value="">Select a city</option>
+                        {% for city in cities_with_states %}
+                        <option value="{{ city.city }}|{{ city.state }}">{{ city.city }}, {{ city.state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div id="city-data-section" style="display: none;">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">City Information</h5>
+                                <p class="card-text">
+                                    <strong>City:</strong> <span id="city-name">-</span><br>
+                                    <strong>State/Province:</strong> <span id="city-state">-</span><br>
+                                    <strong>Average AQI (2024):</strong> <span id="city-avg-aqi">-</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Health Recommendations</h5>
+                                <ul id="health-recommendations">
+                                    <li><strong>Air Quality Monitoring:</strong> Regularly check local air quality forecasts and real-time AQI values.</li>
+                                    <li><strong>Reduce Outdoor Activities:</strong> Limit strenuous outdoor activities during high pollution days.</li>
+                                    <li><strong>Indoor Air Quality:</strong> Use air purifiers with HEPA filters to improve indoor air quality.</li>
+                                    <li><strong>Masks:</strong> Consider wearing N95 or KN95 masks when outdoors during periods of high pollution.</li>
+                                    <li><strong>Travel Planning:</strong> If you have respiratory conditions, consider air quality when planning travel.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container mb-4">
+                    <canvas id="city-monthly-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h4>Top 20 Most Polluted Cities Comparison</h4>
+                    <canvas id="most-polluted-cities-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h3><i class="fas fa-info-circle me-2"></i>Understanding Urban Air Pollution</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Major Urban Pollution Sources:</h5>
+                    <ul>
+                        <li><strong>Transportation:</strong> Vehicle emissions are a major source of nitrogen oxides and particulate matter in urban areas.</li>
+                        <li><strong>Industrial Activities:</strong> Factories, power plants, and refineries emit various pollutants.</li>
+                        <li><strong>Construction:</strong> Building activities generate dust and particulate matter.</li>
+                        <li><strong>Residential Heating/Cooking:</strong> Especially in developing regions, the burning of solid fuels for heating and cooking contributes significantly to indoor and outdoor air pollution.</li>
+                        <li><strong>Waste Burning:</strong> Open burning of waste releases harmful chemicals and particulate matter.</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Urban Planning Solutions:</h5>
+                    <ul>
+                        <li><strong>Public Transportation:</strong> Expanding efficient public transit systems to reduce private vehicle use.</li>
+                        <li><strong>Green Spaces:</strong> Increasing urban vegetation to help filter air pollutants.</li>
+                        <li><strong>Low Emission Zones:</strong> Restricting high-polluting vehicles in certain areas.</li>
+                        <li><strong>Clean Energy:</strong> Transitioning to renewable energy sources for power generation.</li>
+                        <li><strong>Building Standards:</strong> Implementing and enforcing stricter emissions standards for buildings and industry.</li>
+                    </ul>
+                    <img src="https://images.unsplash.com/photo-1667436311383-cb35d18a3f06" alt="City smog" class="img-fluid rounded mt-3">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Air Pollution Info -->
+    <section class="dashboard-card mb-5">
+        <h3><i class="fas fa-globe-americas me-2"></i>Global Air Pollution Crisis</h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Key Facts About Global Air Pollution:</h5>
+                <ul>
+                    <li>According to the World Health Organization (WHO), air pollution is responsible for approximately 7 million premature deaths annually worldwide.</li>
+                    <li>Over 90% of the world's population lives in areas where air quality exceeds WHO guideline limits.</li>
+                    <li>Developing countries, particularly in Asia and Africa, face the highest levels of air pollution.</li>
+                    <li>PM2.5 (fine particulate matter) is considered the most harmful pollutant to human health due to its ability to penetrate deep into the lungs and bloodstream.</li>
+                    <li>Air pollution is linked to respiratory diseases, heart disease, stroke, and lung cancer.</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Air Quality Improvement Strategies:</h5>
+                <ul>
+                    <li><strong>Policy Implementation:</strong> Enforcing stricter air quality standards and emissions regulations.</li>
+                    <li><strong>Clean Energy Transition:</strong> Moving away from fossil fuels towards renewable energy sources.</li>
+                    <li><strong>Sustainable Transportation:</strong> Promoting electric vehicles, public transportation, and active mobility.</li>
+                    <li><strong>Industrial Emissions Control:</strong> Implementing cleaner production technologies and emissions controls in industry.</li>
+                    <li><strong>Public Awareness:</strong> Educating the public about air pollution, its health impacts, and mitigation strategies.</li>
+                </ul>
+                <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7" alt="Clean environment" class="img-fluid rounded mt-3">
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const countriesTabBtn = document.getElementById('countries-tab-btn');
+    const citiesTabBtn = document.getElementById('cities-tab-btn');
+    const countriesTab = document.getElementById('countries-tab');
+    const citiesTab = document.getElementById('cities-tab');
+    
+    countriesTabBtn.addEventListener('click', function() {
+        countriesTab.style.display = 'block';
+        citiesTab.style.display = 'none';
+        countriesTabBtn.classList.add('active');
+        countriesTabBtn.classList.remove('btn-outline-primary');
+        countriesTabBtn.classList.add('btn-primary');
+        citiesTabBtn.classList.remove('active');
+        citiesTabBtn.classList.remove('btn-primary');
+        citiesTabBtn.classList.add('btn-outline-primary');
+    });
+    
+    citiesTabBtn.addEventListener('click', function() {
+        countriesTab.style.display = 'none';
+        citiesTab.style.display = 'block';
+        citiesTabBtn.classList.add('active');
+        citiesTabBtn.classList.remove('btn-outline-primary');
+        citiesTabBtn.classList.add('btn-primary');
+        countriesTabBtn.classList.remove('active');
+        countriesTabBtn.classList.remove('btn-primary');
+        countriesTabBtn.classList.add('btn-outline-primary');
+    });
+    
+    // City selection handling
+    const cityStateSelect = document.getElementById('city-state-select');
+    if (cityStateSelect) {
+        cityStateSelect.addEventListener('change', function() {
+            const value = this.value;
+            if (value) {
+                const [city, state] = value.split('|');
+                loadCityData(city, state);
+                
+                // Show city data section
+                document.getElementById('city-data-section').style.display = 'block';
+            } else {
+                document.getElementById('city-data-section').style.display = 'none';
+            }
+        });
+    }
+    
+    // Load countries chart
+    const countriesChart = document.getElementById('polluted-countries-chart');
+    if (countriesChart) {
+        // Get top polluted countries from the table
+        const countriesTable = document.getElementById('polluted-countries-table');
+        if (countriesTable) {
+            const rows = countriesTable.querySelectorAll('tbody tr');
+            const countries = [];
+            const aqiValues = [];
+            
+            // Limit to top 20 for better visibility
+            const maxRows = Math.min(rows.length, 20);
+            
+            for (let i = 0; i < maxRows; i++) {
+                const cols = rows[i].querySelectorAll('td');
+                if (cols.length >= 3) {
+                    countries.push(cols[1].textContent);
+                    aqiValues.push(parseFloat(cols[2].textContent));
+                }
+            }
+            
+            createPollutionBarChart(
+                'polluted-countries-chart',
+                'Top 20 Most Polluted Countries (2024)',
+                countries,
+                aqiValues
+            );
+        }
+    }
+    
+    // Calculate AQI category distribution for pie chart
+    const categoryDistChart = document.getElementById('category-distribution-chart');
+    if (categoryDistChart) {
+        // Get AQI values from the table
+        const countriesTable = document.getElementById('polluted-countries-table');
+        if (countriesTable) {
+            const rows = countriesTable.querySelectorAll('tbody tr');
+            const categories = {
+                'Good': 0,
+                'Moderate': 0,
+                'Unhealthy for Sensitive Groups': 0,
+                'Unhealthy': 0,
+                'Very Unhealthy': 0,
+                'Hazardous': 0
+            };
+            
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                if (cols.length >= 3) {
+                    const aqi = parseFloat(cols[2].textContent);
+                    if (aqi <= 50) {
+                        categories['Good']++;
+                    } else if (aqi <= 100) {
+                        categories['Moderate']++;
+                    } else if (aqi <= 150) {
+                        categories['Unhealthy for Sensitive Groups']++;
+                    } else if (aqi <= 200) {
+                        categories['Unhealthy']++;
+                    } else if (aqi <= 300) {
+                        categories['Very Unhealthy']++;
+                    } else {
+                        categories['Hazardous']++;
+                    }
+                }
+            });
+            
+            createAQICategoryPieChart(
+                'category-distribution-chart',
+                'AQI Category Distribution',
+                Object.values(categories)
+            );
+        }
+    }
+    
+    // Add search functionality for countries table
+    const countriesSearch = document.getElementById('countries-search');
+    if (countriesSearch) {
+        countriesSearch.addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#polluted-countries-table tbody tr');
+            
+            rows.forEach(row => {
+                const countryName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (countryName.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Create most polluted cities chart when cities tab is clicked
+    citiesTabBtn.addEventListener('click', function() {
+        // Check if chart has already been created
+        if (!window.citiesChartCreated) {
+            // Fetch most polluted cities data from CSV file
+            fetch('/api/heatmap-data')
+                .then(response => response.json())
+                .then(data => {
+                    // Sort by AQI value (highest first)
+                    data.sort((a, b) => b.value - a.value);
+                    
+                    // Get top 20 cities
+                    const topCities = data.slice(0, 20);
+                    
+                    // Extract city names and AQI values
+                    const cityNames = topCities.map(city => `${city.city}, ${city.state}`);
+                    const aqiValues = topCities.map(city => city.value);
+                    
+                    // Create bar chart for most polluted cities
+                    createPollutionBarChart(
+                        'most-polluted-cities-chart',
+                        'Top 20 Most Polluted Cities in India (2024)',
+                        cityNames,
+                        aqiValues
+                    );
+                    
+                    // Mark chart as created
+                    window.citiesChartCreated = true;
+                })
+                .catch(error => {
+                    console.error('Error loading most polluted cities data:', error);
+                    document.getElementById('most-polluted-cities-chart').parentNode.innerHTML = 
+                        '<div class="alert alert-danger">Error loading most polluted cities data. Please try again.</div>';
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

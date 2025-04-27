@@ -1,0 +1,1219 @@
+/* Global Air Quality Monitoring Dashboard Styles */
+
+/* Base styles */
+:root {
+  /* Common colors (same in both modes) */
+  --good-color: #009966;
+  --moderate-color: #ffde33;
+  --sensitive-color: #ff9933;
+  --unhealthy-color: #cc0033;
+  --very-unhealthy-color: #660099;
+  --hazardous-color: #7e0023;
+  --gradient-start: #0071bc;
+  --gradient-end: #00a5e5;
+  --accent-color: #ff7043;
+
+  /* Light mode colors */
+  --primary-color: #0071bc;
+  --secondary-color: #5f6368;
+  --background-color: #f8fafb;
+  --text-color: #202124;
+  --border-color: #e0e5e9;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --card-bg: white;
+  --navbar-bg: white;
+  --navbar-text: #5f6368;
+  --navbar-active: #0071bc;
+  --footer-bg: #333;
+  --footer-text: white;
+  --chart-grid: #e0e0e0;
+  --table-header-bg: #f2f2f2;
+  --table-hover-bg: #f9f9f9;
+}
+
+/* Dark mode colors */
+.dark-mode {
+  --primary-color: #1e88e5;
+  --secondary-color: #b0bec5;
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --border-color: #424242;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --card-bg: #1e1e1e;
+  --navbar-bg: #1e1e1e;
+  --navbar-text: #b0bec5;
+  --navbar-active: #1e88e5;
+  --footer-bg: #0d0d0d;
+  --footer-text: #e0e0e0;
+  --chart-grid: #424242;
+  --table-header-bg: #2d2d2d;
+  --table-hover-bg: #2a2a2a;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Pollutant Cards */
+.pollutant-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pollutant-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pollutant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pollutant-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(0,113,188,0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.pollutant-icon i {
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+.pollutant-info {
+    flex-grow: 1;
+}
+
+.pollutant-info h6 {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.pollutant-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 4px;
+}
+
+.pollutant-arrow {
+    color: #999;
+    margin-left: 10px;
+}
+
+/* AQI Display Styles */
+.aqi-display-container {
+  background: linear-gradient(180deg, #ffa07a 0%, #ff7f50 100%);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.aqi-main-value {
+  font-size: 72px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.aqi-category {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.aqi-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.aqi-detail-item {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.aqi-cartoon {
+  position: absolute;
+  right: 50px;
+  bottom: 0;
+  height: 150px;
+}
+
+.weather-info {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  color: #333;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Header Styles */
+.header {
+  background-color: var(--navbar-bg);
+  box-shadow: 0 2px 5px var(--shadow-color);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.nav-link {
+  color: var(--secondary-color);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: var(--primary-color);
+}
+
+.nav-link.active {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Hero Section */
+.hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                    url('https://images.unsplash.com/photo-1580035144415-01307b0e464a');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 4rem 0;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.dashboard-card h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Map Container */
+#map-container {
+  height: 700px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  position: relative;
+  background-color: #f5f5f5;
+}
+
+/* Hero Section for Map */
+.hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                    url('https://images.unsplash.com/photo-1532960401447-7dd05bef20b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+  background-size: cover;
+  background-position: center;
+  padding: 4rem 0;
+  text-align: center;
+  color: white;
+  margin-bottom: 2rem;
+  border-radius: 0 0 15px 15px;
+}
+
+/* AQI Display Container */
+.aqi-display-container {
+  background: linear-gradient(135deg, #6e8efb 0%, #4a6ee0 100%);
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.aqi-main-value {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.aqi-category {
+  font-size: 24px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Map Controls */
+.map-control-button {
+  background: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.map-control-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Legend Styles */
+.aqi-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.aqi-legend h6 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.aqi-legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.aqi-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+/* Weather Info */
+.weather-info {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  text-align: center;
+}
+
+.weather-info i {
+  margin-right: 8px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #map-container {
+    height: 400px;
+  }
+  
+  .aqi-legend {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 20px;
+  }
+  
+  .weather-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    max-width: 400px;
+    backdrop-filter: blur(10px);
+}
+
+.search-container {
+    margin: 15px 0;
+    position: relative;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 40px;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 25px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,113,188,0.1);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    color: #666;
+}
+
+.location-icon {
+    position: absolute;
+    right: 15px;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.location-icon:hover {
+    transform: scale(1.1);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    margin-top: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+    background-color: rgba(0,113,188,0.05);
+}
+
+.search-result-item i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-aqi {
+    margin-left: auto;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.map-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+.map-info {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.map-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.iqair-map-controls {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-control-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.map-control-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Filters */
+.filters-container {
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px var(--shadow-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease, background-color 0.3s ease;
+}
+
+.filters-container:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.filters-container .row {
+  align-items: flex-end;
+}
+
+.filters-container select {
+  height: 45px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 0 15px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  transition: all 0.2s ease;
+}
+
+.filters-container select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 113, 188, 0.15);
+  outline: none;
+}
+
+.filters-container button {
+  height: 45px;
+  border-radius: 6px;
+  border: none;
+  padding: 0 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filters-container .btn-primary {
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  color: white;
+}
+
+.filters-container .btn-outline-secondary {
+  border: 1px solid var(--border-color);
+  color: var(--secondary-color);
+}
+
+.filters-container .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 113, 188, 0.25);
+}
+
+.filters-container .btn-outline-secondary:hover {
+  background-color: #f5f5f5;
+}
+
+.filters-container .form-label {
+  font-weight: 500;
+  color: var(--secondary-color);
+  margin-bottom: 8px;
+}
+
+/* AQI Legend */
+.aqi-legend {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px var(--shadow-color);
+  justify-content: space-between;
+  transition: background-color 0.3s ease;
+}
+
+.aqi-legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.aqi-legend-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.aqi-color {
+  width: 25px;
+  height: 25px;
+  margin-right: 8px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.aqi-legend-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.aqi-good { background-color: var(--good-color); }
+.aqi-moderate { background-color: var(--moderate-color); }
+.aqi-sensitive { background-color: var(--sensitive-color); }
+.aqi-unhealthy { background-color: var(--unhealthy-color); }
+.aqi-very-unhealthy { background-color: var(--very-unhealthy-color); }
+.aqi-hazardous { background-color: var(--hazardous-color); }
+
+/* Charts */
+.chart-container {
+  height: 400px;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+/* Data Tables */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.data-table th, 
+.data-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table tr:hover {
+  background-color: var(--table-hover-bg);
+  transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.data-table .rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+}
+
+.data-table .top-3 {
+  background-color: #ff7043;
+}
+
+.data-table .top-10 {
+  background-color: #ff9800;
+}
+
+.data-table .aqi-cell {
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 4px 8px;
+  text-align: center;
+  display: inline-block;
+  min-width: 60px;
+  color: white;
+}
+
+.data-table-wrapper {
+  position: relative;
+}
+
+.data-table-search {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  width: 250px;
+}
+
+/* AQI Value Display */
+.aqi-value {
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: white;
+}
+
+.aqi-good-bg { background-color: var(--good-color); }
+.aqi-moderate-bg { background-color: var(--moderate-color); color: black; }
+.aqi-sensitive-bg { background-color: var(--sensitive-color); }
+.aqi-unhealthy-bg { background-color: var(--unhealthy-color); }
+.aqi-very-unhealthy-bg { background-color: var(--very-unhealthy-color); }
+.aqi-hazardous-bg { background-color: var(--hazardous-color); }
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 0;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  #map-container {
+    height: 400px;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+}
+
+/* Footer */
+footer {
+  background-color: #333;
+  color: white;
+  padding: 2rem 0;
+  margin-top: 3rem;
+}
+
+footer a {
+  color: #7fdbff;
+}
+
+footer a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+/* About Page */
+.team-member {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.team-member img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+
+/* Ranking Cards */
+.dashboard-card {
+    position: relative;
+    height: 100%;
+    transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.live-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    color: #f44336;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Stats Cards */
+.stats-card {
+  text-align: center;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.stats-card .number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.stats-card .label {
+  font-size: 1rem;
+  color: var(--secondary-color);
+}
+
+/* Dark Mode Toggle Button */
+.dark-mode-toggle-float {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 10px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.dark-mode-toggle-float:hover {
+  transform: scale(1.1);
+}
+
+/* Loading Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* IQAir Map Styles */
+.map-data-source {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(255,255,255,0.9);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* IQAir specific styles */
+.iqair-logo {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1000;
+  background-color: rgba(255,255,255,0.9);
+  padding: 5px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.iqair-logo img {
+  height: 20px;
+}
+
+.iqair-marker {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.iqair-weather-info {
+  position: absolute;
+  bottom: 50px;
+  right: 10px;
+  background-color: rgba(255,255,255,0.9);
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+}
+
+.iqair-weather-info i {
+  margin-right: 8px;
+  color: var(--primary-color);
+}
+
+.iqair-wind {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.iqair-wind i {
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+.iqair-temp {
+  display: flex;
+  align-items: center;
+}
+
+.iqair-world-ranking {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.iqair-world-ranking-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iqair-world-ranking-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.iqair-ranking-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.iqair-ranking-item {
+  display: flex;
+  padding: 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.iqair-ranking-number {
+  width: 30px;
+  font-weight: bold;
+}
+
+.iqair-ranking-flag {
+  width: 30px;
+  margin-right: 10px;
+}
+
+.iqair-ranking-flag img {
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+}
+
+.iqair-ranking-city {
+  flex-grow: 1;
+}
+
+.iqair-ranking-aqi {
+  width: 50px;
+  text-align: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+}
+
+/* Heatmap layer */
+.iqair-heatmap-toggle {
+  position: absolute;
+  bottom: 90px;
+  right: 10px;
+  z-index: 1000;
+  background-color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.iqair-heatmap-toggle input {
+  margin-right: 5px;
+}
+
+/* Live Data Badge */
+.live-data-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255,255,255,0.9);
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 999;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  color: #00a651;
+  font-weight: bold;
+}
+
+.pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #00a651;
+  margin-right: 5px;
+  position: relative;
+}
+
+.pulse:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #00a651;
+  animation: pulse 1.5s ease-in-out infinite;
+  transform: scale(1);
+  opacity: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Animated AQI Marker Styles */
+/* Hazardous AQI pulse animation (fast pulse for severe pollution) */
+@keyframes hazardous-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(126, 0, 35, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(126, 0, 35, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(126, 0, 35, 0);
+  }
+}
+
+.hazardous-pulse {
+  animation: hazardous-pulse 1s infinite;
+  transform-origin: center;
+}
+
+/* Very Unhealthy AQI pulse animation (medium pulse) */
+@keyframes very-unhealthy-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 0, 153, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(102, 0, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 0, 153, 0);
+  }
+}
+
+.very-unhealthy-pulse {
+  animation: very-unhealthy-pulse 1.5s infinite;
+  transform-origin: center;
+}
+
+/* Unhealthy AQI pulse animation (slow pulse) */
+@keyframes unhealthy-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(204, 0, 51, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(204, 0, 51, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(204, 0, 51, 0);
+  }
+}
+
+.unhealthy-pulse {
+  animation: unhealthy-pulse 2s infinite;
+  transform-origin: center;
+}
+
+/* Trend indicators for popups */
+.trend {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.trend-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.trend.extremely-high .trend-icon {
+  background-color: var(--hazardous-color);
+  box-shadow: 0 0 0 2px rgba(126, 0, 35, 0.3);
+}
+
+.trend.very-high .trend-icon {
+  background-color: var(--very-unhealthy-color);
+  box-shadow: 0 0 0 2px rgba(102, 0, 153, 0.3);
+}
+
+.trend.high .trend-icon {
+  background-color: var(--unhealthy-color);
+  box-shadow: 0 0 0 2px rgba(204, 0, 51, 0.3);
+}
+
+.trend.moderate .trend-icon {
+  background-color: var(--sensitive-color);
+  box-shadow: 0 0 0 2px rgba(255, 153, 51, 0.3);
+}
+
+.trend.low .trend-icon {
+  background-color: var(--moderate-color);
+  box-shadow: 0 0 0 2px rgba(255, 222, 51, 0.3);
+}
+
+.trend.very-low .trend-icon {
+  background-color: var(--good-color);
+  box-shadow: 0 0 0 2px rgba(0, 153, 102, 0.3);
+}

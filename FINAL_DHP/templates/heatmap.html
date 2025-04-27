@@ -1,0 +1,253 @@
+
+{% extends "layout.html" %}
+
+{% block title %}India AQI Heatmap{% endblock %}
+
+{% block page_id %}heatmap{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>India Air Quality Index Heatmap</h2>
+    <div class="card">
+        <div class="card-body">
+            <div id="india-heatmap" style="height: 800px;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Heatmap page loaded");
+    
+    // Initialize map centered on India
+    const map = L.map('india-heatmap', {
+        zoomControl: false, // We'll add custom zoom control
+        attributionControl: false // We'll add this separately
+    }).setView([20.5937, 78.9629], 5);
+    
+    // Add custom zoom control to top right
+    L.control.zoom({
+        position: 'topright'
+    }).addTo(map);
+    
+    // Add attribution control to bottom right
+    L.control.attribution({
+        position: 'bottomright',
+        prefix: '© OpenStreetMap contributors | IQAir-style visualization'
+    }).addTo(map);
+    
+    // Add tile layer with modern style
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors, © CARTO'
+    }).addTo(map);
+    
+    // Add India state boundaries for better visualization
+    fetch('https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJson(data, {
+                style: {
+                    color: '#666',
+                    weight: 1,
+                    opacity: 0.5,
+                    fillOpacity: 0.1
+                }
+            }).addTo(map);
+        })
+        .catch(error => {
+            console.error('Error loading India state boundaries:', error);
+        });
+
+    // Add legend
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+        
+        const grades = [0, 50, 100, 150, 200, 300];
+        const colors = ['#009966', '#ffde33', '#ff9933', '#cc0033', '#660099', '#7e0023'];
+        const labels = ['Good', 'Moderate', 'Unhealthy for Sensitive Groups', 'Unhealthy', 'Very Unhealthy', 'Hazardous'];
+        
+        div.innerHTML = '<h4>AQI Legend</h4>';
+        
+        for (let i = 0; i < grades.length; i++) {
+            div.innerHTML += 
+                '<i style="background:' + colors[i] + '; width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7;"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + (grades[i + 1] - 1) + '<br>' : '+');
+            div.innerHTML += ' ' + labels[i] + '<br>';
+        }
+        
+        return div;
+    };
+    legend.addTo(map);
+
+    // Display loading indicator
+    const loadingIndicator = L.control({position: 'center'});
+    loadingIndicator.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'loading-indicator');
+        div.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        return div;
+    };
+    loadingIndicator.addTo(map);
+
+    // Fetch heatmap data
+    fetch('/api/heatmap-data')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch heatmap data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove loading indicator
+            document.querySelector('.loading-indicator').remove();
+            
+            // Process data for heatmap
+            const heatmapData = [];
+            
+            data.forEach(item => {
+                if (item.latitude && item.longitude) {
+                    // Intensity based on AQI value (normalized)
+                    let intensity = item.value / 300; // Normalize to 0-1 range
+                    if (intensity > 1) intensity = 1;
+                    if (intensity < 0.1) intensity = 0.1;
+                    
+                    heatmapData.push([item.latitude, item.longitude, intensity]);
+                    
+                    // Also add marker with popup for each city
+                    const markerColor = getColorForAQI(item.value);
+                    const pulseClass = item.value > 300 ? 'hazardous-pulse' : 
+                                      (item.value > 200 ? 'very-unhealthy-pulse' : 
+                                      (item.value > 150 ? 'unhealthy-pulse' : ''));
+                    
+                    // Create custom icon with pulse effect based on AQI level
+                    const customIcon = L.divIcon({
+                        className: `custom-marker ${pulseClass}`,
+                        html: `<div style="background-color:${markerColor}; width:100%; height:100%; border-radius:50%; border:2px solid white;"></div>`,
+                        iconSize: [15, 15],
+                        iconAnchor: [7.5, 7.5]
+                    });
+                    
+                    const marker = L.marker([item.latitude, item.longitude], {
+                        icon: customIcon
+                    });
+                    
+                    // Create a detailed popup with trend indicator
+                    const trendHTML = getTrendIndicator(item.value);
+                    
+                    marker.bindPopup(`
+                        <div class="marker-popup">
+                            <div class="location-badge">India</div>
+                            <h5>${item.city}, ${item.state}</h5>
+                            <div class="aqi-display" style="background-color: ${markerColor}; color: ${getTextColorForBackground(markerColor)}">
+                                ${Math.round(item.value)}
+                                <div style="font-size: 12px; margin-top: 5px;">${getAQICategoryFromValue(item.value)}</div>
+                            </div>
+                            ${trendHTML}
+                        </div>
+                    `, {
+                        maxWidth: 300
+                    });
+                    
+                    marker.addTo(map);
+                }
+            });
+            
+            // Add heat layer
+            L.heatLayer(heatmapData, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 10,
+                gradient: {
+                    0.3: '#009966', // Good
+                    0.5: '#ffde33', // Moderate
+                    0.6: '#ff9933', // Unhealthy for Sensitive Groups
+                    0.7: '#cc0033', // Unhealthy
+                    0.8: '#660099', // Very Unhealthy
+                    0.9: '#7e0023'  // Hazardous
+                }
+            }).addTo(map);
+        })
+        .catch(error => {
+            console.error('Error loading heatmap data:', error);
+            document.querySelector('.loading-indicator').remove();
+            
+            // Show error message on map
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.style.position = 'absolute';
+            errorDiv.style.top = '50%';
+            errorDiv.style.left = '50%';
+            errorDiv.style.transform = 'translate(-50%, -50%)';
+            errorDiv.style.zIndex = 1000;
+            errorDiv.innerHTML = 'Error loading heatmap data. Please try again.';
+            document.getElementById('india-heatmap').appendChild(errorDiv);
+        });
+        
+    // Helper functions
+    function getColorForAQI(aqi) {
+        if (aqi <= 50) return '#009966'; // Good
+        else if (aqi <= 100) return '#ffde33'; // Moderate
+        else if (aqi <= 150) return '#ff9933'; // Unhealthy for Sensitive Groups
+        else if (aqi <= 200) return '#cc0033'; // Unhealthy
+        else if (aqi <= 300) return '#660099'; // Very Unhealthy
+        else return '#7e0023'; // Hazardous
+    }
+    
+    function getAQICategoryFromValue(aqi) {
+        if (aqi <= 50) return 'Good';
+        else if (aqi <= 100) return 'Moderate';
+        else if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+        else if (aqi <= 200) return 'Unhealthy';
+        else if (aqi <= 300) return 'Very Unhealthy';
+        else return 'Hazardous';
+    }
+    
+    function getTextColorForBackground(backgroundColor) {
+        // Yellow/moderate color needs dark text, others use white
+        if (backgroundColor === '#ffde33') {
+            return '#000000';
+        }
+        return '#ffffff';
+    }
+    
+    function getTrendIndicator(aqi) {
+        let trend, description;
+        
+        if (aqi > 300) {
+            trend = 'extremely-high';
+            description = 'Extremely high pollution levels';
+        } else if (aqi > 200) {
+            trend = 'very-high';
+            description = 'Very high pollution levels';
+        } else if (aqi > 150) {
+            trend = 'high';
+            description = 'High pollution levels';
+        } else if (aqi > 100) {
+            trend = 'moderate';
+            description = 'Moderate pollution levels';
+        } else if (aqi > 50) {
+            trend = 'low';
+            description = 'Low pollution levels';
+        } else {
+            trend = 'very-low';
+            description = 'Very low pollution levels';
+        }
+        
+        return `
+            <div class="trend ${trend}">
+                <span class="trend-icon"></span>
+                <span class="trend-description">${description}</span>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

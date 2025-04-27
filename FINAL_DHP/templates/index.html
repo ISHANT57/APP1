@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+
+{% block title %}Global Air Quality Monitoring - Homepage{% endblock %}
+
+{% block page_id %}index{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>Global Air Quality Monitoring</h1>
+        <p>Track real-time air quality data from around the world. Explore interactive maps, historical trends, and valuable insights about air pollution.</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Statistics Overview -->
+    <section class="mb-5">
+        <h2 class="mb-4">Air Quality Overview</h2>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <i class="fas fa-globe fa-3x mb-3 text-primary"></i>
+                    <div class="number">{{ global_avg_aqi|round(1) }}</div>
+                    <div class="label">Global Average AQI</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <i class="fas fa-mask-face fa-3x mb-3 text-warning"></i>
+                    <div class="number">{{ top_polluted_countries[0]['Country'] }}</div>
+                    <div class="label">Most Polluted Country</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <i class="fas fa-cloud fa-3x mb-3 text-danger"></i>
+                    <div class="number">{{ top_polluted_countries[0]['2024 Avg']|round(1) }}</div>
+                    <div class="label">Highest Average AQI</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <i class="fas fa-lungs fa-3x mb-3 text-success"></i>
+                    <div class="number">{{ countries|length }}</div>
+                    <div class="label">Countries Monitored</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Content -->
+    <section class="mb-5">
+        <div class="row">
+            <!-- Map Preview -->
+            <div class="col-lg-8 mb-4">
+                <div class="dashboard-card h-100">
+                    <h3><i class="fas fa-map-marked-alt me-2"></i>Interactive Air Quality Map</h3>
+                    <div id="map-container" style="height: 400px;"></div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('map_view') }}" class="btn btn-primary">
+                            Explore Full Map <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Polluted Countries -->
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card h-100">
+                    <h3><i class="fas fa-smog me-2"></i>Most Polluted Countries</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="top-countries-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Country</th>
+                                    <th>AQI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for country in top_polluted_countries %}
+                                <tr>
+                                    <td>{{ country.Rank }}</td>
+                                    <td>{{ country.Country }}</td>
+                                    <td>{{ country['2024 Avg'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('most_polluted') }}" class="btn btn-outline-primary">
+                            View Full List <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Data Visualizations -->
+    <section class="mb-5">
+        <div class="row">
+            <!-- Featured Countries Chart -->
+            <div class="col-lg-12 mb-4">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-bar me-2"></i>Featured Countries Comparison</h3>
+                    <div class="chart-container">
+                        <canvas id="featured-countries-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Info Cards -->
+    <section class="mb-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-info-circle me-2"></i>What is AQI?</h3>
+                    <p>The Air Quality Index (AQI) is a measure used to communicate how polluted the air currently is or how polluted it is forecast to become.</p>
+                    <div class="aqi-legend mt-3">
+                        <div class="d-flex flex-column">
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-good"></div>
+                                <span>0-50: Good</span>
+                            </div>
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-moderate"></div>
+                                <span>51-100: Moderate</span>
+                            </div>
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-sensitive"></div>
+                                <span>101-150: Unhealthy for Sensitive Groups</span>
+                            </div>
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-unhealthy"></div>
+                                <span>151-200: Unhealthy</span>
+                            </div>
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-very-unhealthy"></div>
+                                <span>201-300: Very Unhealthy</span>
+                            </div>
+                            <div class="aqi-legend-item">
+                                <div class="aqi-color aqi-hazardous"></div>
+                                <span>301+: Hazardous</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-line me-2"></i>Historical Data</h3>
+                    <p>Access historical air quality data for countries and cities worldwide. Analyze trends, seasonal patterns, and long-term changes in air pollution levels.</p>
+                    <img src="https://images.unsplash.com/photo-1560962340-4f952471ea57" alt="City with smog" class="img-fluid rounded mb-3">
+                    <a href="{{ url_for('historical') }}" class="btn btn-outline-primary w-100">View Historical Data</a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-city me-2"></i>Most Polluted Cities</h3>
+                    <p>Discover which cities around the world have the highest levels of air pollution. View monthly trends and compare air quality between different urban areas.</p>
+                    <img src="https://images.unsplash.com/photo-1607623813910-941f43e22167" alt="City with pollution" class="img-fluid rounded mb-3">
+                    <a href="{{ url_for('most_polluted') }}" class="btn btn-outline-primary w-100">View Most Polluted</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="mb-5">
+        <h2 class="mb-4">Key Features</h2>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marked-alt fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Interactive Maps</h5>
+                        <p class="card-text">Explore air quality data on interactive maps with color-coded markers indicating pollution levels.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Historical Trends</h5>
+                        <p class="card-text">Analyze historical air quality data to understand trends and seasonal patterns.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-filter fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Advanced Filtering</h5>
+                        <p class="card-text">Filter data by continent, country, and city to focus on areas of interest.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sync-alt fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Regular Updates</h5>
+                        <p class="card-text">Data is regularly updated to provide the most current air quality information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section class="mb-5 text-center py-5" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1426694012323-fb5e8b0c165b'); background-size: cover; background-position: center; color: white; border-radius: 8px;">
+        <div class="py-4">
+            <h2>Ready to Explore Air Quality Data?</h2>
+            <p class="lead">Access comprehensive air quality information from around the world.</p>
+            <a href="{{ url_for('map_view') }}" class="btn btn-primary btn-lg mt-3">
+                Explore the Interactive Map <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

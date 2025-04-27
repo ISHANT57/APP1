@@ -1,0 +1,444 @@
+{% extends "layout.html" %}
+
+{% block title %}Historical Air Quality Data{% endblock %}
+
+{% block page_id %}historical{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1494931216633-3f436bf43829');">
+    <div class="container">
+        <h1>Historical Air Quality Data</h1>
+        <p>Analyze air quality trends over time for countries and cities across the globe. Compare pollution levels and identify patterns.</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Selections -->
+    <div class="filters-container mb-4">
+        <ul class="nav nav-tabs" id="comparisonTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="country-tab" data-bs-toggle="tab" data-bs-target="#country-data" type="button" role="tab" aria-controls="country-data" aria-selected="true">
+                    <i class="fas fa-flag me-1"></i> Country Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="city-tab" data-bs-toggle="tab" data-bs-target="#city-data" type="button" role="tab" aria-controls="city-data" aria-selected="false">
+                    <i class="fas fa-city me-1"></i> City Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="country-comparison-tab" data-bs-toggle="tab" data-bs-target="#country-comparison" type="button" role="tab" aria-controls="country-comparison" aria-selected="false">
+                    <i class="fas fa-balance-scale me-1"></i> Country Comparison
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="city-comparison-tab" data-bs-toggle="tab" data-bs-target="#city-comparison" type="button" role="tab" aria-controls="city-comparison" aria-selected="false">
+                    <i class="fas fa-random me-1"></i> City Comparison
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content mt-3" id="comparisonTabContent">
+            <!-- Country data selection -->
+            <div class="tab-pane fade show active" id="country-data" role="tabpanel" aria-labelledby="country-tab">
+                <div class="row">
+                    <div class="col-md-10">
+                        <label for="country-select" class="form-label">Select Country:</label>
+                        <select id="country-select" class="form-select">
+                            <option value="">Select a country</option>
+                            {% for country in countries %}
+                            <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="load-country-btn" class="btn btn-primary w-100">Load Data</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- City data selection -->
+            <div class="tab-pane fade" id="city-data" role="tabpanel" aria-labelledby="city-tab">
+                <div class="row">
+                    <div class="col-md-10">
+                        <label for="city-select" class="form-label">Select City:</label>
+                        <select id="city-select" class="form-select">
+                            <option value="">Select a city</option>
+                            {% for city in cities_with_states|default([]) %}
+                            <option value="{{ city.city }}|{{ city.state }}">{{ city.city }}, {{ city.state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="load-city-btn" class="btn btn-primary w-100">Load Data</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Country comparison selection -->
+            <div class="tab-pane fade" id="country-comparison" role="tabpanel" aria-labelledby="country-comparison-tab">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="country-select-1" class="form-label">First Country:</label>
+                        <select id="country-select-1" class="form-select">
+                            <option value="">Select a country</option>
+                            {% for country in countries %}
+                            <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="country-select-2" class="form-label">Second Country:</label>
+                        <select id="country-select-2" class="form-select">
+                            <option value="">Select a country</option>
+                            {% for country in countries %}
+                            <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="compare-countries-button" class="btn btn-primary w-100">Compare</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- City comparison selection -->
+            <div class="tab-pane fade" id="city-comparison" role="tabpanel" aria-labelledby="city-comparison-tab">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="city-select-1" class="form-label">First City:</label>
+                        <select id="city-select-1" class="form-select">
+                            <option value="">Select a city</option>
+                            {% for city in cities_with_states|default([]) %}
+                            <option value="{{ city.city }}|{{ city.state }}">{{ city.city }}, {{ city.state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="city-select-2" class="form-label">Second City:</label>
+                        <select id="city-select-2" class="form-select">
+                            <option value="">Select a city</option>
+                            {% for city in cities_with_states|default([]) %}
+                            <option value="{{ city.city }}|{{ city.state }}">{{ city.city }}, {{ city.state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="compare-cities-button" class="btn btn-primary w-100">Compare</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Country Data Section -->
+    <section id="country-data-container" class="dashboard-card mb-5">
+        <h3><i class="fas fa-flag me-2"></i>Country Air Quality Trends</h3>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Country Information</h5>
+                        <p class="card-text">
+                            <strong>Country:</strong> <span id="country-name">Select a country</span><br>
+                            <strong>Average AQI (2024):</strong> <span id="country-avg-aqi">-</span><br>
+                            <strong>Global Rank:</strong> <span id="country-rank">-</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">AQI Health Implications</h5>
+                        <div id="aqi-implications">
+                            <ul>
+                                <li><strong>Good (0-50):</strong> Air quality is satisfactory, and air pollution poses little or no risk.</li>
+                                <li><strong>Moderate (51-100):</strong> Air quality is acceptable, but some pollutants may be a concern for a small number of people.</li>
+                                <li><strong>Unhealthy for Sensitive Groups (101-150):</strong> Members of sensitive groups may experience health effects.</li>
+                                <li><strong>Unhealthy (151-200):</strong> Everyone may begin to experience health effects.</li>
+                                <li><strong>Very Unhealthy (201-300):</strong> Health alert: everyone may experience more serious health effects.</li>
+                                <li><strong>Hazardous (301+):</strong> Health warning of emergency conditions. The entire population is likely to be affected.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container mt-4">
+            <canvas id="country-monthly-chart"></canvas>
+        </div>
+    </section>
+    
+    <!-- City Data Section -->
+    <section id="city-data-section" class="dashboard-card mb-5" style="display: none;">
+        <h3><i class="fas fa-city me-2"></i>City Air Quality Trends</h3>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">City Information</h5>
+                        <p class="card-text">
+                            <strong>City:</strong> <span id="city-name">Select a city</span><br>
+                            <strong>State/Province:</strong> <span id="city-state">-</span><br>
+                            <strong>Average AQI (2024):</strong> <span id="city-avg-aqi">-</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">City Pollution Sources</h5>
+                        <div id="pollution-sources">
+                            <p>Common sources of air pollution in urban areas include:</p>
+                            <ul>
+                                <li><strong>Vehicle Emissions:</strong> Cars, trucks, and buses emit nitrogen oxides and particulate matter.</li>
+                                <li><strong>Industrial Activities:</strong> Factories and power plants release various pollutants including sulfur dioxide and heavy metals.</li>
+                                <li><strong>Construction:</strong> Dust and diesel emissions from construction equipment.</li>
+                                <li><strong>Residential Heating:</strong> Especially in winter months, burning fossil fuels for heating contributes to air pollution.</li>
+                                <li><strong>Agricultural Activities:</strong> Pesticides, fertilizers, and dust from farming operations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container mt-4">
+            <canvas id="city-monthly-chart"></canvas>
+        </div>
+    </section>
+    
+    <!-- Country Comparison Section -->
+    <section id="country-comparison-section" class="dashboard-card mb-5" style="display: none;">
+        <h3><i class="fas fa-balance-scale me-2"></i>Country to Country Comparison</h3>
+        <p>This chart compares the monthly AQI trends between the selected countries, helping to identify differences in air quality patterns at the national level.</p>
+        
+        <div class="chart-container mt-4">
+            <canvas id="country-comparison-chart"></canvas>
+        </div>
+    </section>
+    
+    <!-- City Comparison Section -->
+    <section id="city-comparison-section" class="dashboard-card mb-5" style="display: none;">
+        <h3><i class="fas fa-random me-2"></i>City to City Comparison</h3>
+        <p>This chart compares the monthly AQI trends between the selected cities, helping to identify differences in urban air quality patterns.</p>
+        
+        <div class="chart-container mt-4">
+            <canvas id="city-comparison-chart"></canvas>
+        </div>
+    </section>
+    
+    <!-- Understanding Air Quality Data -->
+    <section class="dashboard-card mb-5">
+        <h3><i class="fas fa-book-reader me-2"></i>Understanding Air Quality Data</h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Key Air Quality Pollutants:</h5>
+                <ul>
+                    <li><strong>PM2.5:</strong> Fine particulate matter with a diameter of 2.5 micrometers or less. These particles can penetrate deep into the lungs and even enter the bloodstream.</li>
+                    <li><strong>PM10:</strong> Particulate matter with a diameter of 10 micrometers or less, including dust, pollen, and mold.</li>
+                    <li><strong>Ozone (O3):</strong> A gas that forms when pollutants from vehicles and industry react with sunlight. It can cause respiratory problems.</li>
+                    <li><strong>Nitrogen Dioxide (NO2):</strong> A gas primarily from vehicle emissions and power plants that can irritate airways.</li>
+                    <li><strong>Sulfur Dioxide (SO2):</strong> Primarily from fossil fuel combustion, it can harm the respiratory system.</li>
+                    <li><strong>Carbon Monoxide (CO):</strong> A gas released from vehicle exhaust that reduces oxygen delivery throughout the body.</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Seasonal Patterns:</h5>
+                <p>Air quality often shows clear seasonal patterns due to:</p>
+                <ul>
+                    <li><strong>Winter:</strong> In many regions, cold weather leads to increased heating emissions and temperature inversions that trap pollutants near the ground.</li>
+                    <li><strong>Summer:</strong> Hot temperatures and sunlight can increase ozone formation, while wildfires may contribute to particulate pollution.</li>
+                    <li><strong>Monsoon Seasons:</strong> In South Asian countries, the pre-monsoon period often sees the worst air quality, with improvements during the rainy season.</li>
+                    <li><strong>Agricultural Burning:</strong> Seasonal crop burning can dramatically worsen air quality in certain regions.</li>
+                </ul>
+                <img src="https://images.unsplash.com/photo-1467579424161-6bbc141569d7" alt="Clean air environment" class="img-fluid rounded mt-3">
+            </div>
+        </div>
+    </section>
+    
+    <!-- Air Quality Resources -->
+    <section class="dashboard-card mb-5">
+        <h3><i class="fas fa-link me-2"></i>Additional Air Quality Resources</h3>
+        
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Global Organizations</h5>
+                        <ul>
+                            <li><a href="https://www.who.int/health-topics/air-pollution" target="_blank">World Health Organization (WHO)</a></li>
+                            <li><a href="https://www.unep.org/explore-topics/air" target="_blank">UN Environment Programme</a></li>
+                            <li><a href="https://www.epa.gov/air-research" target="_blank">US Environmental Protection Agency</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Air Quality Research</h5>
+                        <ul>
+                            <li><a href="https://www.sciencedirect.com/journal/atmospheric-environment" target="_blank">Atmospheric Environment Journal</a></li>
+                            <li><a href="https://www.sciencedirect.com/journal/environmental-research" target="_blank">Environmental Research Journal</a></li>
+                            <li><a href="https://www.stateofglobalair.org/" target="_blank">State of Global Air Report</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Monitoring Networks</h5>
+                        <ul>
+                            <li><a href="https://www.iqair.com" target="_blank">IQAir</a></li>
+                            <li><a href="https://www.aqi.in" target="_blank">AQI.in</a></li>
+                            <li><a href="https://www.airnow.gov/" target="_blank">AirNow</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all necessary DOM elements
+    const countrySelect = document.getElementById('country-select');
+    const citySelect = document.getElementById('city-select');
+    const loadCountryBtn = document.getElementById('load-country-btn');
+    const loadCityBtn = document.getElementById('load-city-btn');
+    const countrySelect1 = document.getElementById('country-select-1');
+    const countrySelect2 = document.getElementById('country-select-2');
+    const citySelect1 = document.getElementById('city-select-1');
+    const citySelect2 = document.getElementById('city-select-2');
+    const compareCountriesBtn = document.getElementById('compare-countries-button');
+    const compareCitiesBtn = document.getElementById('compare-cities-button');
+    
+    // Handle single country data loading
+    if (loadCountryBtn) {
+        loadCountryBtn.addEventListener('click', function() {
+            const country = countrySelect.value;
+            if (country) {
+                loadCountryData(country);
+                document.getElementById('country-data-container').style.display = 'block';
+            } else {
+                alert('Please select a country to load its data.');
+            }
+        });
+    }
+    
+    // Handle single city data loading
+    if (loadCityBtn) {
+        loadCityBtn.addEventListener('click', function() {
+            const cityValue = citySelect.value;
+            if (cityValue) {
+                const [city, state] = cityValue.split('|');
+                loadCityData(city, state);
+                document.getElementById('city-data-section').style.display = 'block';
+            } else {
+                alert('Please select a city to load its data.');
+            }
+        });
+    }
+    
+    // Handle country-to-country comparison
+    if (compareCountriesBtn) {
+        compareCountriesBtn.addEventListener('click', function() {
+            const country1 = countrySelect1.value;
+            const country2 = countrySelect2.value;
+            
+            if (country1 && country2) {
+                Promise.all([
+                    fetch(`/api/country-data/${country1}`).then(response => response.json()),
+                    fetch(`/api/country-data/${country2}`).then(response => response.json())
+                ])
+                .then(([country1Data, country2Data]) => {
+                    // Create comparison chart
+                    createComparisonChart(
+                        'country-comparison-chart',
+                        `${country1Data.country} vs ${country2Data.country} (2024)`,
+                        country1Data.months,
+                        country1Data.monthly_data,
+                        country1Data.country,
+                        country2Data.monthly_data,
+                        country2Data.country
+                    );
+                    
+                    // Show country comparison section
+                    document.getElementById('country-comparison-section').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading country comparison data:', error);
+                    alert('Error loading country comparison data. Please try again.');
+                });
+            } else {
+                alert('Please select two countries to compare.');
+            }
+        });
+    }
+    
+    // Handle city-to-city comparison
+    if (compareCitiesBtn) {
+        compareCitiesBtn.addEventListener('click', function() {
+            const cityValue1 = citySelect1.value;
+            const cityValue2 = citySelect2.value;
+            
+            if (cityValue1 && cityValue2) {
+                const [city1, state1] = cityValue1.split('|');
+                const [city2, state2] = cityValue2.split('|');
+                
+                Promise.all([
+                    fetch(`/api/city-data/${city1}/${state1}`).then(response => response.json()),
+                    fetch(`/api/city-data/${city2}/${state2}`).then(response => response.json())
+                ])
+                .then(([city1Data, city2Data]) => {
+                    // Create comparison chart
+                    createComparisonChart(
+                        'city-comparison-chart',
+                        `${city1Data.city}, ${city1Data.state} vs ${city2Data.city}, ${city2Data.state} (2024)`,
+                        city1Data.months,
+                        city1Data.monthly_data,
+                        `${city1Data.city}, ${city1Data.state}`,
+                        city2Data.monthly_data,
+                        `${city2Data.city}, ${city2Data.state}`
+                    );
+                    
+                    // Show city comparison section
+                    document.getElementById('city-comparison-section').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading city comparison data:', error);
+                    alert('Error loading city comparison data. Please try again.');
+                });
+            } else {
+                alert('Please select two cities to compare.');
+            }
+        });
+    }
+    
+    // Auto-load country data if already selected
+    if (countrySelect && countrySelect.value) {
+        loadCountryData(countrySelect.value);
+    }
+    
+    // Auto-load city data if already selected
+    if (citySelect && citySelect.value) {
+        const [city, state] = citySelect.value.split('|');
+        loadCityData(city, state);
+        document.getElementById('city-data-section').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

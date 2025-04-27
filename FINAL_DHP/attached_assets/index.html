@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Air Quality Map</title>
+    <style>
+        #selectors { margin-bottom: 10px; }
+        #aqi-legend { margin-top: 10px; }
+        #aqi-legend span { display: inline-block; width: 20px; height: 20px; margin-right: 5px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <h2>Interactive Air Quality Map</h2>
+    <div id="selectors">
+        <label>Continent:
+            <select id="continent-select">
+                <option value="All">All</option>
+                {% for cont in continents %}
+                <option value="{{ cont }}">{{ cont }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Country:
+            <select id="country-select">
+                <option value="All">All</option>
+                {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>City:
+            <select id="city-select">
+                <option value="All">All</option>
+                {% for city in cities %}
+                <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button id="reset-btn">Reset</button>
+    </div>
+    <div id="map-container" style="width: 100%; height: 600px;">
+        <iframe id="map-frame" src="{{ map_path }}" width="100%" height="600"></iframe>
+    </div>
+    <div id="aqi-legend">
+        <span style="background:green"></span> 0–50 Good
+        <span style="background:yellow"></span> 51–100 Moderate
+        <span style="background:orange"></span> 101–150 Unhealthy for Sensitive Groups
+        <span style="background:red"></span> 151–200 Unhealthy
+        <span style="background:purple"></span> 201–300 Very Unhealthy
+        <span style="background:maroon"></span> 301–500 Hazardous
+    </div>
+    <script>
+    // Load marker data for JS filtering
+    let markerData = [];
+    fetch('/static/marker_data.json')
+        .then(response => response.json())
+        .then(data => { markerData = data; });
+
+    // Filtering logic (reloads map with filtered markers)
+    function filterMarkers() {
+        const continent = document.getElementById('continent-select').value;
+        const country = document.getElementById('country-select').value;
+        const city = document.getElementById('city-select').value;
+
+        // Filter markerData
+        const filtered = markerData.filter(m =>
+            (continent === 'All' || m.Continent === continent) &&
+            (country === 'All' || m.Country === country) &&
+            (city === 'All' || m.City === city)
+        );
+        // Regenerate map with filtered data
+        fetch('/static/interactive_air_quality_map.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('map-frame').srcdoc = html;
+            });
+        // Optionally, send filter params to Flask and regenerate map server-side for large datasets
+    }
+
+    document.getElementById('continent-select').addEventListener('change', filterMarkers);
+    document.getElementById('country-select').addEventListener('change', filterMarkers);
+    document.getElementById('city-select').addEventListener('change', filterMarkers);
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        document.getElementById('continent-select').value = 'All';
+        document.getElementById('country-select').value = 'All';
+        document.getElementById('city-select').value = 'All';
+        filterMarkers();
+    });
+
+    // For "show only dot on click": this is best handled in the map itself using Folium's click events and custom JS.
+    // For advanced interactivity, consider using a JS mapping library (e.g., Leaflet) directly.
+    </script>
+</body>
+</html>
